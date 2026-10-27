@@ -4,14 +4,14 @@ import type { Stat } from '../types/types';
 
 //MUI
 import Typography from '@mui/material/Typography';
-import { Button, Container } from '@mui/material';
+import { Button, Container, TextField } from '@mui/material';
 
 
-export function CharacterPanel ({ player, onStatIncrease } : { player: Character, onStatIncrease: (stat: Stat) => void}) {
+export function CharacterPanel ({ player, onStatIncrease, onNameChange } : { player: Character, onStatIncrease: (stat: Stat) => void, onNameChange: (name:string)=>void}) {
   
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" gutterBottom>{player.name}</Typography>
+      <TextField id="outlined-basic" variant="outlined" value={player.name} onChange={(e) => onNameChange(e.target.value)}/>
       <p>Level: {player.level}</p>
       <p>Xp: {player.xp} / {calculateRequiredXp(player.level)}</p>
       <ul>stats: 

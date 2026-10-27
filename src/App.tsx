@@ -35,13 +35,33 @@ const darkTheme = createTheme({
 
 function App() {
 
-  const [player, setPlayer] = useState(() => createCharacter("Zyx"))
-  const [missions, setMissions] = useState(() => 
-  [
-    generateMission(player.level),
-    generateMission(player.level),
-    generateMission(player.level)
-  ])
+  const [player, setPlayer] = useState(() => {
+    const saved = localStorage.getItem('player')
+    if(saved) {
+      return JSON.parse(saved)
+    }
+    return createCharacter("Unamed Hero")
+  })
+
+  useEffect(() => {
+    localStorage.setItem('player', JSON.stringify(player))
+  }, [player])
+
+  const [missions, setMissions] = useState<Mission[]>([])
+  
+  useEffect(() => {
+    async function loadMissions() {
+      const newMissions = await Promise.all([
+        generateMission(player.level),
+        generateMission(player.level),
+        generateMission(player.level)
+      ])
+      setMissions(newMissions)
+    }
+
+    loadMissions()
+  }, [])
+
   const [activeMission, setActiveMission] = useState<Mission | null>(null)
 
   function handleAttemptMission(mission: Mission) {setActiveMission(mission)}
@@ -76,7 +96,7 @@ function App() {
       <ThemeProvider theme={darkTheme}>
         <CssBaseline/>
 
-        <CharacterPanel player={player} onStatIncrease={handleStatIncrease}/>
+        <CharacterPanel player={player} onStatIncrease={handleStatIncrease} onNameChange={(name) => setPlayer({...player, name})}/>
 
         {activeMission === null ? (
           <Box sx={{ flexGrow: 1 }}>
@@ -97,14 +117,19 @@ function App() {
             <ActiveMission 
               mission={activeMission}
               player={player}
-              onComplete={(success: boolean) => {
+              onComplete={async (success: boolean) => {
                 const xpEarned = success ? activeMission!.xpReward : 0
 
                 setPlayer({
                   ...player,
                   xp: player.xp + xpEarned
                 })
+              
+                const newMission = await generateMission(player.level)
 
+                setMissions(missions.map(m =>
+                  m === activeMission ? newMission : m
+                ))
                 setActiveMission(null)
               }} 
             />

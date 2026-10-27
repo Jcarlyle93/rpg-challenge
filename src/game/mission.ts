@@ -1,6 +1,7 @@
 import type { Mission } from "../interfaces/interfaces.ts";
+import { generateMissionName } from "../services/groq.ts";
 
-export function generateMission(playerLevel: number): Mission {
+export async function generateMission(playerLevel: number): Promise<Mission> {
   const playerToStats = (5 + playerLevel)
   const budget = Math.round(playerToStats * 1.1)
   
@@ -17,17 +18,21 @@ export function generateMission(playerLevel: number): Mission {
   const vitality = Math.min(cuts[3] - cuts[2], 10)
   const charisma = Math.min(budget - cuts[3], 10)
 
+  const requirements = {
+    strength: strength,
+    dexterity: dexterity,
+    intellect: intellect,
+    vitality: vitality,
+    charisma: charisma
+  }
+
+  const { name, description } = await generateMissionName(requirements)
+
   return {
 
-    name: "Our First Mission",
-    description: "This is out first ever genrated mission!",
+    name,
+    description,
     xpReward: 50 * playerLevel,
-    requirements: {
-      strength: strength,
-      dexterity: dexterity,
-      intellect: intellect,
-      vitality: vitality,
-      charisma: charisma
-    }
+    requirements
   }
 }

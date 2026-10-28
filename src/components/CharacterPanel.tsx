@@ -3,7 +3,6 @@ import { calculateRequiredXp } from '../game/character';
 import type { Stat } from '../types/types';
 
 //MUI
-import Typography from '@mui/material/Typography';
 import { Button, Container, TextField } from '@mui/material';
 
 

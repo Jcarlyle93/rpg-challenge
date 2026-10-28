@@ -48,15 +48,26 @@ function App() {
   }, [player])
 
   const [missions, setMissions] = useState<Mission[]>([])
+
+  useEffect(()=> {
+    if (missions.length > 0) {
+      localStorage.setItem('missions', JSON.stringify(missions))
+    }
+  }, [missions])
   
   useEffect(() => {
     async function loadMissions() {
-      const newMissions = await Promise.all([
-        generateMission(player.level),
-        generateMission(player.level),
-        generateMission(player.level)
-      ])
-      setMissions(newMissions)
+      const saved = localStorage.getItem('missions')
+      if (saved) {
+        setMissions(JSON.parse(saved))
+      } else {
+        const newMissions = await Promise.all([
+          generateMission(player.level),
+          generateMission(player.level),
+          generateMission(player.level)
+        ])
+        setMissions(newMissions)
+      }
     }
 
     loadMissions()

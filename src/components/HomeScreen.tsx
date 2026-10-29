@@ -1,0 +1,35 @@
+import { Grid, Skeleton, Box, Typography, Button } from '@mui/material';
+import type { SaveData, SaveSlot } from '../interfaces/interfaces';
+
+export function HomeScreen({ onStart, SaveData }: { onStart: () => void, SaveData: SaveData} ) {
+  const title = "ReactPlayingGame Self Learning"
+  
+  const savedGamesList = Object.entries(SaveData).map(([slotKey, slotData]) => (
+    <Grid key={slotKey} size={4}>
+      {slotData ? (
+        <>{slotData.player.name}
+        <Button variant="contained" onClick={onStart}> Select slot {slotKey} </Button>
+        </>
+      ) : (
+        <>Empty Slot
+        <p></p>
+        <Button variant="contained" onClick={onStart}> Select slot </Button>
+        </>
+      )}
+    </Grid>
+  ));
+  
+  return (
+    <Box>
+      <Typography variant="h2" gutterBottom>{title}</Typography>
+      <p> Welcome to my little project. After years spent in Angular, I've decided to spend some personal development time in react.</p>
+      <p> Although I do Agree AI can be a powerful tool for Devs, I feel it's important for devs to have a good understanding of the busines logic,
+        therefore, this project was created the old fasioned way. React docs, google and good old stack overflow.
+      </p>
+      <p>_</p>
+      <Grid container wrap="nowrap" spacing={2}>
+        {savedGamesList}
+      </Grid>
+    </Box>
+  )
+}

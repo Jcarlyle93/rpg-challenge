@@ -6,9 +6,10 @@ import { generateMission } from "./game/mission.ts"
 import { CharacterPanel } from './components/CharacterPanel.tsx'
 import { MissionCard } from './components/MissionCard.tsx'
 import { ActiveMission } from './components/ActiveMission.tsx'
+import { HomeScreen } from './components/HomeScreen.tsx'
 
 //types
-import type { Mission } from './interfaces/interfaces.ts'
+import type { Mission, SaveData, SaveSlot } from './interfaces/interfaces.ts'
 import type { Stat } from './types/types.ts'
 
 //MUI
@@ -35,6 +36,19 @@ const darkTheme = createTheme({
 
 function App() {
 
+  const[screen, setScreen] = useState('home')
+
+  const [saveData, setSaveData] = useState<SaveData>(() => {
+    const saved = localStorage.getItem('saveSlots')
+    if (saved)
+      return JSON.parse(saved)
+    return { slot1: null, slot2: null, slot3: null}
+  })
+
+  const [missions, setMissions] = useState<Mission[]>([])
+
+  const [activeMission, setActiveMission] = useState<Mission | null>(null)
+
   const [player, setPlayer] = useState(() => {
     const saved = localStorage.getItem('player')
     if(saved) {
@@ -46,8 +60,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem('player', JSON.stringify(player))
   }, [player])
-
-  const [missions, setMissions] = useState<Mission[]>([])
 
   useEffect(()=> {
     if (missions.length > 0) {
@@ -72,8 +84,6 @@ function App() {
 
     loadMissions()
   }, [])
-
-  const [activeMission, setActiveMission] = useState<Mission | null>(null)
 
   function handleAttemptMission(mission: Mission) {setActiveMission(mission)}
   
@@ -107,46 +117,53 @@ function App() {
       <ThemeProvider theme={darkTheme}>
         <CssBaseline/>
 
-        <CharacterPanel player={player} onStatIncrease={handleStatIncrease} onNameChange={(name) => setPlayer({...player, name})}/>
-
-        {activeMission === null ? (
-          <Box sx={{ flexGrow: 1 }}>
-            <Typography variant="h2" gutterBottom>
-              Avaliable Missions
-            </Typography>
-            <Grid container spacing={2}>
-              {missions.map((mission, index) => (
-                <Grid size={4}>
-                  <MissionCard key={index} mission={mission} stats={player.stats} onAttempt={handleAttemptMission}/>
-                </Grid>
-              ))}
-            </Grid>
-          </Box>
+        {screen === 'home' ? ( 
+          <>
+            <HomeScreen onStart={()=> setScreen('game')} SaveData={saveData}/>
+          </>
         ) : (
-          <Box sx={{ flexGrow: 1 }}>
-            Mission in progress
-            <ActiveMission 
-              mission={activeMission}
-              player={player}
-              onComplete={async (success: boolean) => {
-                const xpEarned = success ? activeMission!.xpReward : 0
+          <>
+            <CharacterPanel player={player} onStatIncrease={handleStatIncrease} onNameChange={(name) => setPlayer({...player, name})}/>
 
-                setPlayer({
-                  ...player,
-                  xp: player.xp + xpEarned
-                })
-              
-                const newMission = await generateMission(player.level)
+            {activeMission === null ? (
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="h2" gutterBottom>
+                  Avaliable Missions
+                </Typography>
+                <Grid container spacing={2}>
+                  {missions.map((mission, index) => (
+                    <Grid size={4}>
+                      <MissionCard key={index} mission={mission} stats={player.stats} onAttempt={handleAttemptMission}/>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Box>
+            ) : (
+              <Box sx={{ flexGrow: 1 }}>
+                Mission in progress
+                <ActiveMission 
+                  mission={activeMission}
+                  player={player}
+                  onComplete={async (success: boolean) => {
+                    const xpEarned = success ? activeMission!.xpReward : 0
 
-                setMissions(missions.map(m =>
-                  m === activeMission ? newMission : m
-                ))
-                setActiveMission(null)
-              }} 
-            />
-          </Box>
+                    setPlayer({
+                      ...player,
+                      xp: player.xp + xpEarned
+                    })
+                  
+                    const newMission = await generateMission(player.level)
+
+                    setMissions(missions.map(m =>
+                      m === activeMission ? newMission : m
+                    ))
+                    setActiveMission(null)
+                  }} 
+                />
+              </Box>
+            )}
+          </>
         )}
-
       </ThemeProvider>
     </Container>
   )

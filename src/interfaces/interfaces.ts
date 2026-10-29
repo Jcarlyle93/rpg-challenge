@@ -14,3 +14,14 @@ export interface Mission {
   requirements: Stats,
   xpReward: number
 }
+
+export interface SaveSlot {
+  player: Character,
+  Missions: Mission[]
+}
+
+export interface SaveData {
+  slot1: SaveSlot | null,
+  slot2: SaveSlot | null,
+  slot3: SaveSlot | null
+}

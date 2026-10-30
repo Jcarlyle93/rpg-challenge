@@ -1,21 +1,17 @@
 import { Grid, Skeleton, Box, Typography, Button } from '@mui/material';
 import type { SaveData, SaveSlot } from '../interfaces/interfaces';
+import { SlotPanel } from  './slotPanel.tsx'
 
-export function HomeScreen({ onStart, SaveData }: { onStart: () => void, SaveData: SaveData} ) {
+export function HomeScreen({ onStart, SaveData }: { onStart: (slotKey: string) => void, SaveData: SaveData} ) {
   const title = "ReactPlayingGame Self Learning"
   
   const savedGamesList = Object.entries(SaveData).map(([slotKey, slotData]) => (
     <Grid key={slotKey} size={4}>
-      {slotData ? (
-        <>{slotData.player.name}
-        <Button variant="contained" onClick={onStart}> Select slot {slotKey} </Button>
-        </>
-      ) : (
-        <>Empty Slot
-        <p></p>
-        <Button variant="contained" onClick={onStart}> Select slot </Button>
-        </>
-      )}
+      <SlotPanel
+        slotKey={slotKey}
+        slotData={slotData}
+        onStart={onStart}
+      />
     </Grid>
   ));
   
